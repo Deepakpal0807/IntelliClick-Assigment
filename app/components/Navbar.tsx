@@ -41,7 +41,13 @@ export default observer(function Navbar() {
               <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-md z-10">
                 {store.favorites.length ? (
                   store.favorites.map((city, idx) => (
-                    <div key={idx} className="px-4 py-2 hover:bg-gray-100">{city}</div>
+                    <Link
+                      key={idx}
+                      href={`/weather/${encodeURIComponent(city)}`}  // Pass the city name as URL parameter
+                      className="block px-4 py-2 hover:bg-gray-100 text-blue-600 hover:text-blue-800"
+                    >
+                      {city}
+                    </Link>
                   ))
                 ) : (
                   <div className="px-4 py-2 text-gray-500">No favorites</div>
@@ -59,7 +65,13 @@ export default observer(function Navbar() {
               <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-md z-10">
                 {store.history.length ? (
                   store.history.map((city, idx) => (
-                    <div key={idx} className="px-4 py-2 hover:bg-gray-100">{city}</div>
+                    <Link
+                      key={idx}
+                      href={`/weather/${encodeURIComponent(city)}`}  // Pass the city name as URL parameter
+                      className="block px-4 py-2 hover:bg-gray-100 text-blue-600 hover:text-blue-800"
+                    >
+                      {city}
+                    </Link>
                   ))
                 ) : (
                   <div className="px-4 py-2 text-gray-500">No history</div>

@@ -3,19 +3,40 @@
 import { useEffect, useState } from 'react';
 import { WeatherResponse } from '../../types';
 import { useWeatherStore } from '../../store/weatherStore';
+import { useStore } from '../../context/StoreProvider';
 import { ArrowUp,
   ArrowDown,
   Droplets,
   Wind,
   Gauge,
-  Eye, Sunrise, Sunset } from 'lucide-react';
+  Eye, Sunrise, Sunset, 
+  Star} from 'lucide-react';
+import { observer } from 'mobx-react-lite';
+
 
 export default function WeatherPage({ params }: { params: { city: string } }) {
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const updateCityWeather = useWeatherStore((state) => state.updateCityWeather);
   const cityName = decodeURIComponent(params.city);
-  
+  const store = useStore(); // Get the store instance
+  const [city, setCity] = useState(''); // Local state for the input field cc
+
+   const handleAddFavorite = () => {
+    const x=store.favorites.includes(city);
+    if(x){
+      store.removeFavorite(city);
+    }else{
+      store.addFavorite(city);
+      // setCity('');
+    }
+   
+  };
+
+  // Remove city from favorites
+  const handleRemoveFavorite = (city: string) => {
+    store.removeFavorite(city);
+  };
   
   useEffect(() => {
     const fetchWeather = async () => {
@@ -26,7 +47,9 @@ export default function WeatherPage({ params }: { params: { city: string } }) {
           `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apikey}&units=metric`
         );
         if (!response.ok) throw new Error('Weather data not found');
+        setCity(cityName)
         const data: WeatherResponse = await response.json();
+        store.addToHistory(cityName);
         setWeather(data);
         updateCityWeather(cityName, {
           temperature: data.main.temp,
@@ -109,7 +132,16 @@ export default function WeatherPage({ params }: { params: { city: string } }) {
         <div className="p-8">
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-4xl font-bold">{cityName}</h1>
+              <h1 className="text-4xl font-bold flex items-center">
+  {cityName}
+  <Star
+  className={`ml-2 cursor-pointer transition-colors ${
+    store.favorites.includes(city) ? 'text-yellow-400' : 'text-white/70'
+  }`}
+  onClick={handleAddFavorite}
+/>
+{/* Add margin-left to create space between text and icon */}
+</h1>
               <p className="text-white/80 mt-1">{weather.sys.country}</p>
             </div>
             <div className="text-right">

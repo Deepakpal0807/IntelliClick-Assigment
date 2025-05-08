@@ -1,5 +1,4 @@
-// stores/CityStore.ts
-import { types, Instance } from 'mobx-state-tree';
+import { types, Instance, onSnapshot } from 'mobx-state-tree';
 
 export const CityModel = types.model('CityModel', {
   name: types.string,
@@ -11,27 +10,41 @@ export const RootStore = types
     history: types.array(types.string),
   })
   .actions(self => ({
-    // Add a city to favorites
     addFavorite(city: string) {
       if (!self.favorites.includes(city)) {
         self.favorites.push(city);
       }
     },
-    // Remove a city from favorites
     removeFavorite(city: string) {
-      self.favorites = self.favorites.filter(favorite => favorite !== city);
+      self.favorites = self.favorites.filter(fav => fav !== city);
     },
-    // Add a city to history (with a limit of 10)
     addToHistory(city: string) {
-      const existing = self.history.filter(c => c !== city);
-      self.history = [city, ...existing].slice(0, 10);
+      const uniqueHistory = self.history.filter(c => c !== city);
+      self.history = [city, ...uniqueHistory].slice(0, 10);
     },
   }));
 
-export const createStore = () =>
-  RootStore.create({
-    favorites: [],
-    history: [],
+const LOCAL_STORAGE_KEY = 'weather-app-store';
+
+export const createStore = () => {
+  const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+  let store: RootInstance;
+
+  try {
+    store = savedData
+      ? RootStore.create(JSON.parse(savedData))
+      : RootStore.create({ favorites: [], history: [] });
+  } catch (error) {
+    console.error('Failed to load store from localStorage:', error);
+    store = RootStore.create({ favorites: [], history: [] });
+  }
+
+  onSnapshot(store, snapshot => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(snapshot));
   });
+
+  return store;
+};
 
 export type RootInstance = Instance<typeof RootStore>;
