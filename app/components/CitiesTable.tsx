@@ -16,21 +16,19 @@ import Link from 'next/link';
 import { ArrowUp,
   ArrowDown,Search 
  } from 'lucide-react';
+ import { Row } from '@tanstack/react-table';
 
 const columnHelper = createColumnHelper<City>();
 
 // Define a number sorting function
-const numberSort = (rowA, rowB, columnId) => {
+const numberSort = (rowA: Row<City>, rowB: Row<City>, columnId: string) => {
   const a = rowA.getValue(columnId);
   const b = rowB.getValue(columnId);
 
-  // Ensure a and b are numbers
-  if (typeof a === 'number' && typeof b === 'number') {
-    return a - b;
-  }
+  const numA = typeof a === 'number' ? a : Number(a) || 0;
+  const numB = typeof b === 'number' ? b : Number(b) || 0;
 
-  // Fallback if values are not numbers (optional, depending on your data)
-  return a ? 1 : -1;  // This can be adjusted based on your needs
+  return numA - numB;
 };
 
 const columns = [

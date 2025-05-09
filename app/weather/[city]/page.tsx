@@ -75,7 +75,7 @@ export default function WeatherPage({ params }: { params: { city: string } }) {
 
   const getBackgroundByIcon = (icon: string) => {
     const map: Record<string, string> = {
-     '01d': 'from-yellow-200 to-orange-300',    // Clear Day: Soft sunny
+     '01d': 'from-yellow-50 to-orange-700',    // Clear Day: Soft sunny
   '01n': 'from-blue-gray-900 to-indigo-900', // Clear Night: Calm night sky
 
   '02d': 'from-sky-200 to-blue-400',         // Few Clouds Day

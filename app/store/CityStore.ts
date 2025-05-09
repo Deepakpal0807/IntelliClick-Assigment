@@ -9,25 +9,37 @@ export const RootStore = types
     favorites: types.array(types.string),
     history: types.array(types.string),
   })
-  .actions(self => ({
+ .actions(self => ({
+    // Add a city to favorites (if not already there)
     addFavorite(city: string) {
       if (!self.favorites.includes(city)) {
         self.favorites.push(city);
       }
     },
+
+    // Remove a city from favorites
     removeFavorite(city: string) {
-      self.favorites = self.favorites.filter(fav => fav !== city);
+      // Use replace() to update the MST array
+      self.favorites.replace(self.favorites.filter(fav => fav !== city));
     },
+
+    // Add a city to the history, ensuring no duplicates and limiting to the last 10 cities
     addToHistory(city: string) {
       const uniqueHistory = self.history.filter(c => c !== city);
-      self.history = [city, ...uniqueHistory].slice(0, 10);
+      // Use replace() to update the MST array
+      self.history.replace([city, ...uniqueHistory].slice(0, 10));
     },
   }));
 
 const LOCAL_STORAGE_KEY = 'weather-app-store';
 
 export const createStore = () => {
-  const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+  let savedData: string | null = null;
+
+  // Only access localStorage in the browser
+  if (typeof window !== 'undefined') {
+    savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+  }
 
   let store: RootInstance;
 
@@ -40,9 +52,12 @@ export const createStore = () => {
     store = RootStore.create({ favorites: [], history: [] });
   }
 
-  onSnapshot(store, snapshot => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(snapshot));
-  });
+  // Subscribe to changes and save to localStorage (only in browser)
+  if (typeof window !== 'undefined') {
+    onSnapshot(store, snapshot => {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(snapshot));
+    });
+  }
 
   return store;
 };
